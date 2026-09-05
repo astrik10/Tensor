@@ -105,6 +105,7 @@ From the most recent `run_log.json` in this repo (run `2026-09-05T06:45:22Z` →
 |---|---:|---:|
 | Logistic Regression | 85.20% | 110 |
 | Random Forest | 87.44% | 110 |
+| LSTM | 92.7% | 110 |
 
 > Note: `write_run_log()` **overwrites** `run_log.json` on every checkpoint, so these numbers reflect one specific run, not a fixed benchmark. Before final submission, open `run_log.json` yourself and confirm `final_accuracy` / `total_ticks_processed` match what's shown here — if you've run the pipeline again since, re-paste the current values.
 
@@ -122,7 +123,7 @@ From the most recent `run_log.json` in this repo (run `2026-09-05T06:45:22Z` →
 - **Bitcoin only** — the scraper also collects Ethereum prices into `data\live_ticks.csv`, but the pipeline filters to `coin == "bitcoin"` only; the ETH stretch goal isn't implemented.
 - **Only 2 of 3 possible models** — `src\models.py` implements Logistic Regression and Random Forest; the optional KNN stretch model isn't present.
 - **`training_volatility` isn't persisted** — `run_pipeline.bootstrap()` computes it in memory for the drift check but never writes it to `run_log.json` or anywhere on disk. Any other tool that needs it (e.g. a dashboard) has to recompute it from `data\historical_ticks.csv` independently, which is wasted computation and a risk of drift-check inconsistency between processes.
-- **No hyperparameter tuning** — both models use fixed settings (`LogisticRegression(max_iter=1000)`, `RandomForestClassifier(n_estimators=200)`); no cross-validation or search was done.
+- **No hyperparameter tuning** — all three models use fixed settings (`LogisticRegression(max_iter=1000)`, `RandomForestClassifier(n_estimators=200)`); no cross-validation or search was done.
 - **`logs\predictions.jsonl` is append-only across runs** — restarting `run_pipeline.py` doesn't separate or version prediction history by run, so `compute_rolling_accuracy()` can mix predictions from different trained model versions if the pipeline has been restarted multiple times.
 - **Single evaluation metric** — only accuracy is tracked; precision/recall/F1 would give a fuller picture, especially if UP/DOWN classes are imbalanced.
 - **No automated tests beyond features** — `tests/` only covers `src\features.py`; `models.py`, `monitor.py`, and `run_pipeline.py` have no unit tests.
